@@ -8,7 +8,7 @@ __depends__ = {"20210814_01_xwCee_add_role_column_to_accounts_table"}
 steps = [
     step(
     """
-    CREATE TYPE notification_types as ENUM ('none', 'artist_updated', 'account_promotion', 'account_demotion', 'administrative');
+    CREATE IF NOT EXISTS TYPE notification_types as ENUM ('none', 'artist_updated', 'account_promotion', 'account_demotion', 'administrative');
     CREATE TABLE IF NOT EXISTS notification (
         id BIGSERIAL PRIMARY KEY,
         account_id INT NOT NULL,
