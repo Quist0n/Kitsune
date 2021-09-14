@@ -11,7 +11,7 @@ steps = [
     CREATE TABLE IF NOT EXISTS notification (
         id BIGSERIAL PRIMARY KEY,
         account_id INT NOT NULL,
-        type INT NOT NULL DEFAULT 'none',
+        type INT NOT NULL,
         categories text[] NOT NULL,
         extra_info jsonb,
         created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
