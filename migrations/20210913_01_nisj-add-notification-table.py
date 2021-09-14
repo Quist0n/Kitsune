@@ -27,7 +27,6 @@ steps = [
 
     """
     DROP TABLE IF EXISTS notification;
-    DROP TYPE notification_types;
     """
     )
     ]
