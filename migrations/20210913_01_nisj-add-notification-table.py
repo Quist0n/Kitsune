@@ -8,11 +8,10 @@ __depends__ = {"20210814_01_xwCee_add_role_column_to_accounts_table"}
 steps = [
     step(
     """
-    CREATE TYPE notification_types as ENUM ('none', 'artist_updated', 'account_role_change', 'administrative');
     CREATE TABLE IF NOT EXISTS notification (
         id BIGSERIAL PRIMARY KEY,
         account_id INT NOT NULL,
-        type notification_types NOT NULL DEFAULT 'none',
+        type INT NOT NULL DEFAULT 'none',
         categories text[] NOT NULL,
         extra_info jsonb,
         created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
