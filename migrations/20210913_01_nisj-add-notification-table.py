@@ -3,7 +3,7 @@
 Add notification table with indexes
 """
 from yoyo import step
-__depends__ = {"20210814_01_xwCee_add_role_column_to_accounts_table"}
+__depends__ = {"20210905_01_rjak-add_index_to_accounts_table"}
 
 steps = [
     step(
