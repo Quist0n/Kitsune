@@ -3,6 +3,7 @@ import json
 import os
 import config
 
+from configs.derived_vars import is_development
 from ..internals.utils.flask_thread import FlaskThread
 from ..internals.utils.utils import get_import_id
 from ..internals.utils.encryption import encrypt_and_log_session
@@ -56,6 +57,11 @@ def import_api():
     elif service == 'discord':
         target = discord.import_posts
         args = (key, channel_ids)
+    elif is_development and service == 'kemono-dev':
+        from development import kemono_dev
+        target = kemono_dev.import_posts
+        args = (key,)
+
 
     if target is not None and args is not None:
         logger.log(import_id, f'Starting import. Your import id is {import_id}.')

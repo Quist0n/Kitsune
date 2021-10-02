@@ -1,5 +1,5 @@
 """
-This folder holds development-only modules.
+This folder holds development modules.
 Only modules imported to this file are allowed to be imported outside.
 These imports always have to be conditional, such as:
 ```python
@@ -8,3 +8,6 @@ if (is_development):
     module_name()
 ```
 """
+
+from .lib import kemono_dev
+from .internals.importer import service_name
