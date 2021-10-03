@@ -36,8 +36,8 @@ def import_post(import_id:str, key: str, post: Post):
 
 def save_post_to_db(post: Post):
     query_args = dict(
-        fields= post.keys(),
-        values= post.values(),
+        fields= ",".join(post.keys()),
+        values= ",".join(post.values()),
     )
     query = """
         INSERT INTO posts (%(fields)s)
