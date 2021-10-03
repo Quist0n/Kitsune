@@ -1,4 +1,3 @@
-from datetime import datetime
 from development.internals.random import Custom_Random
 from development.internals.importer import service_name
 
@@ -15,7 +14,6 @@ def random_post() -> Post:
         service= service_name,
         title= test_random.lorem_ipsum(1, 1),
         content= test_random.lorem_ipsum(1, 5),
-        embed= random_embed(),
         shared_file= test_random.boolean(),
         file= random_file(),
         attachments= [random_attachment() for attachment in range(1, test_random.randint(1, 50))]

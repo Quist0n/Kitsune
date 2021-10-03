@@ -9,14 +9,14 @@ class Optional(TypedDict, total= False):
     added: datetime
     published: datetime
     edited: datetime
+    embed: Embed
+    shared_file: bool
+    title: str
+    content: str
 
 class Post(Optional):
     id: str
     user_id: str
     service: str
-    title: str
-    content: str
-    embed: Embed
-    shared_file: bool
     file: File
     attachments: List[Attachment]
