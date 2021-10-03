@@ -1,4 +1,11 @@
+from datetime import datetime
 from typing import TypedDict
 
-class User(TypedDict):
-    pass
+class Optional(TypedDict, total= False):
+    indexed: datetime
+    updated: datetime
+
+class User(Optional):
+    id: str
+    name: str
+    service: str

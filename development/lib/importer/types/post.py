@@ -5,7 +5,12 @@ from .attachment import Attachment
 from .embed import Embed
 from .file import File
 
-class Post(TypedDict):
+class Optional(TypedDict, total= False):
+    added: datetime
+    published: datetime
+    edited: datetime
+
+class Post(Optional):
     id: str
     user_id: str
     service: str
@@ -13,8 +18,5 @@ class Post(TypedDict):
     content: str
     embed: Embed
     shared_file: bool
-    added: datetime
-    published: str
-    edited: str
     file: File
     attachments: List[Attachment]
