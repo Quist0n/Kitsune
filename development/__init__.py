@@ -10,4 +10,5 @@ if (is_development):
 """
 
 from .lib import kemono_dev
-from .internals.importer import service_name
+from .internals import service_name
+from .blueprints import development

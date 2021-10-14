@@ -138,8 +138,9 @@ def download_file(
             with open(join(temp_dir, temp_name), 'wb+') as file:
                 shutil.copyfileobj(r.raw, file)
                 # filename guessing
+                reported_mime, _ = cgi.parse_header(r.headers['content-type']) if r.headers.get('content-type') else None
                 mime = magic.from_file(join(temp_dir, temp_name), mime=True)
-                extension = re.sub('^.jpe$', '.jpg', mimetypes.guess_extension(mime, strict=False))
+                extension = re.sub('^.jpe$', '.jpg', mimetypes.guess_extension(mime or reported_mime or 'application/octet-stream', strict=False) or '.bin')
                 reported_filename = name or r.headers.get('x-amz-meta-original-filename') or get_filename_from_cd(r.headers.get('content-disposition')) or (str(uuid.uuid4()) + extension)
                 
                 # content integrity
@@ -175,14 +176,14 @@ def download_file(
                 )
 
                 if (exists(join(config.download_path, 'data', hash_filename))):
-                    shutil.rmtree(temp_dir)
+                    shutil.rmtree(temp_dir, ignore_errors=True)
                     return reported_filename, '/' + hash_filename, r
                 
                 file.close()
                 
-                makedirs(join(config.download_path, file_hash[0:2], file_hash[2:4]), exist_ok=True)
+                makedirs(join(config.download_path, 'data', file_hash[0:2], file_hash[2:4]), exist_ok=True)
                 rename(join(temp_dir, temp_name), join(config.download_path, 'data', hash_filename))
-                shutil.rmtree(temp_dir)
+                shutil.rmtree(temp_dir, ignore_errors=True)
                 make_thumbnail(join(config.download_path, 'data', hash_filename))
                 return reported_filename, '/' + hash_filename, r
         except requests.HTTPError as e:

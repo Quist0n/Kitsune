@@ -2,13 +2,16 @@ from flask import Blueprint, request
 import json
 import os
 import config
+import threading
 
 from configs.derived_vars import is_development
+from ..internals.utils import thread_master
 from ..internals.utils.flask_thread import FlaskThread
 from ..internals.utils.utils import get_import_id
 from ..internals.utils.encryption import encrypt_and_log_session
 from ..internals.utils import logger
 from ..lib.import_manager import import_posts
+from ..lib.autoimport import decrypt_all_good_keys, log_import_id
 from ..internals.utils.download import uniquify
 from werkzeug.utils import secure_filename
 
@@ -21,11 +24,56 @@ from ..importers import fantia
 
 api = Blueprint('api', __name__)
 
+@api.route('/api/autoimport', methods=['POST'])
+def autoimport_api():
+    prv_key = request.form.get('private_key')
+
+    if not prv_key:
+        return "No private key provided.", 401
+
+    keys_to_import = None
+    try:
+        keys_to_import = decrypt_all_good_keys(prv_key)
+    except:
+        return "Error while decrypting session tokens. The private key may be incorrect.", 401
+
+    threads = []
+    for key in keys_to_import:
+        import_id = get_import_id(key['encrypted_key'])
+        target = None
+        args = None
+        if key['service'] == 'patreon':
+            target = patreon.import_posts
+            args = (key['encrypted_key'], False, key['contributor_id'], False, key['id'])
+        elif key['service'] == 'fanbox':
+            target = fanbox.import_posts
+            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+        elif key['service'] == 'subscribestar':
+            target = subscribestar.import_posts
+            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+        elif key['service'] == 'gumroad':
+            target = gumroad.import_posts
+            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+        elif key['service'] == 'fantia':
+            target = fantia.import_posts
+            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+        elif key['service'] == 'discord':
+            target = discord.import_posts
+            args = (key['encrypted_key'], key['discord_channel_ids'], key['contributor_id'], False, key['id'])
+
+        log_import_id(key['id'], import_id)
+        threads.append(FlaskThread(target=import_posts, args=(import_id, target, args)))
+
+    FlaskThread(target=thread_master.run, args=(threads,)).run()
+
+    return '', 200
+
 @api.route('/api/import', methods=['POST'])
 def import_api():
     key = request.form.get('session_key')
     import_id = get_import_id(key)
     service = request.form.get('service')
+    allowed_to_auto_import = request.form.get('auto_import', False)
     allowed_to_save_session = request.form.get('save_session_key', False)
     allowed_to_scrape_dms = request.form.get('save_dms', False)
     channel_ids = request.form.get('channel_ids')
@@ -41,27 +89,26 @@ def import_api():
     args = None
     if service == 'patreon':
         target = patreon.import_posts
-        args = (key, allowed_to_scrape_dms, contributor_id)
+        args = (key, allowed_to_scrape_dms, contributor_id, allowed_to_auto_import, None)
     elif service == 'fanbox':
         target = fanbox.import_posts
-        args = (key,)
+        args = (key, contributor_id, allowed_to_auto_import, None)
     elif service == 'subscribestar':
         target = subscribestar.import_posts
-        args = (key,)
+        args = (key, contributor_id, allowed_to_auto_import, None)
     elif service == 'gumroad':
         target = gumroad.import_posts
-        args = (key,)
+        args = (key, contributor_id, allowed_to_auto_import, None)
     elif service == 'fantia':
         target = fantia.import_posts
-        args = (key,)
+        args = (key, contributor_id, allowed_to_auto_import, None)
     elif service == 'discord':
         target = discord.import_posts
-        args = (key, channel_ids)
+        args = (key, channel_ids.strip().replace(" ", ""), contributor_id, allowed_to_auto_import, None)
     elif is_development and service == 'kemono-dev':
         from development import kemono_dev
         target = kemono_dev.import_posts
         args = (key,)
-
 
     if target is not None and args is not None:
         logger.log(import_id, f'Starting import. Your import id is {import_id}.')
@@ -85,3 +132,7 @@ def upload_file(path):
     filename = uniquify(os.path.join(config.download_path, path, secure_filename(uploaded_file.filename)))
     uploaded_file.save(os.path.join(config.download_path, path, filename))
     return os.path.join('/', path, filename), 200
+
+@api.route('/api/active_imports', methods=['GET'])
+def get_thread_count():
+    return str(threading.active_count()), 200

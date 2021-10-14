@@ -1,5 +1,5 @@
 """
-This modules holds various constants not related to environment variables.
+This module holds various constants not related to environment variables.
 Therefore no exported functions allowed.
 """
 
