@@ -9,6 +9,6 @@ if (is_development):
 ```
 """
 
-from .lib import kemono_dev
+from .lib import importer as kemono_dev
 from .internals import service_name
 from .blueprints import development

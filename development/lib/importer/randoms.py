@@ -1,4 +1,4 @@
-from development import service_name
+from development.internals import service_name
 from development.types import Extended_Random
 
 from .types import Post, User, DM, Comment, Embed, File, Attachment

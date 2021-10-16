@@ -7,6 +7,10 @@ from src.lib.autoimport import encrypt_and_save_session_for_auto_import
 
 development = Blueprint('development', __name__)
 
+@development.route('/development/test-entries', methods=['POST'])
+def generate_test_entries():
+    return '', 200
+
 @development.route('/development/service-keys', methods=['POST'])
 def generate_service_keys():
     account_id: str = request.form.get('account_id')
