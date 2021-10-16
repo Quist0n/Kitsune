@@ -1,4 +1,5 @@
 import string
+from datetime import datetime
 from random import Random
 from .lorem import lorem_sentences
 
@@ -11,6 +12,9 @@ class Extended_Random(Random):
     varchar_vocab = string.ascii_letters + string.digits
     text_vocab = string.printable
     sentence_list = lorem_sentences
+    #Unix epoch time limits
+    unix_max_date = datetime(2021, 10, 5, 0, 0, 0).timestamp()
+    unix_min_date = datetime.fromtimestamp(0)
 
     def string(self, min_length: int, max_length: int, vocabulary: str = varchar_vocab):
         "Creates a continious string with random letters."
@@ -56,5 +60,6 @@ class Extended_Random(Random):
 
         return result
 
-    # def date(self):
-    #     pass
+    def date(min_timestamp = int(unix_min_date), max_timestamp = int(unix_max_date)) -> datetime:
+        random_timestamp = randint(unix_min_date, unix_max_date)
+        return datetime.fromtimestamp(random_timestamp)
