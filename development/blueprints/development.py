@@ -1,15 +1,39 @@
 from flask import Blueprint, request
+from datetime import datetime
 
-from development.internals import dev_random
-from development.lib import randoms
+from development.internals import dev_random, service_name
+from development.lib import importer
 from development.lib.service_key import get_service_keys, kill_service_keys
+from development.types import Extended_Random
+from src.internals.utils import logger
+from src.internals.utils.utils import get_import_id
+from src.internals.utils.flask_thread import FlaskThread
+from src.lib import import_manager
 from src.lib.autoimport import encrypt_and_save_session_for_auto_import
 
 development = Blueprint('development', __name__)
 
 @development.route('/development/test-entries', methods=['POST'])
 def generate_test_entries():
-    return '', 200
+    seed = 'Kitsune_Sneedy_Seed'
+    max_date = datetime(2021, 10, 5, 0, 0, 0)
+    test_random = Extended_Random(seed, max_date)
+    key = dev_random.string(127, 255)
+    import_id = get_import_id(key)
+    service = service_name
+    target = importer.import_posts
+    args = (key, test_random)
+
+    if target and args:
+        logger.log(import_id, f'Starting import. Your import id is {import_id}.')
+        FlaskThread(
+            target=import_manager.import_posts,
+            args=(import_id, target, args)
+        ).start()
+    else:
+        logger.log(import_id, f'Error starting import. Your import id is {import_id}.')
+
+    return import_id, 200
 
 @development.route('/development/service-keys', methods=['POST'])
 def generate_service_keys():

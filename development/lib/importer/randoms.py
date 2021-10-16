@@ -1,61 +1,21 @@
-from development.internals import service_name
+from development.internals import service_name, dev_random
 from development.types import Extended_Random
 
-from .types import Post, User, DM, Comment, Embed, File, Attachment
+from .types import Post_Model, User
 
-
-seed = 'Kitsune_Sneedy_Seed'
-test_random = Extended_Random(seed)
-
-
-def random_post() -> Post:
-    post = Post(
-        id = test_random.string(0, 255),
-        user_id = test_random.string(0, 255),
-        service = service_name
-    )
+def random_post(random: Extended_Random = dev_random) -> Post_Model:
+    post: Post_Model = {
+        'id': random.string(5, 25),
+        '"user"': random.string(5, 25),
+        'service': service_name
+    }
     return post
 
 
-def random_user() -> User:
+def random_user(random: Extended_Random = dev_random) -> User:
     user = User(
-            id = test_random.string(0, 255),
+        id = random.string(5, 25),
         service = service_name
 
     )
     return user
-
-
-def random_dm() -> DM:
-    dm = DM(
-            id = test_random.string(0, 255),
-            user_id = test_random.string(0, 255),
-            service = service_name,
-            content = test_random.string(0, 128),
-            embed = random_embed(),
-            file = random_file(),
-            published = test_random.date(),
-    )
-
-    return dm
-
-
-def random_comment() -> Comment:
-    pass
-
-
-def random_embed() -> Embed:
-    embed = Embed(
-
-    )
-    return embed
-
-
-def random_file() -> File:
-    file = File()
-    return file
-
-
-def random_attachment() -> Attachment:
-    attachment = Attachment()
-    return attachment

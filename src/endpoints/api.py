@@ -4,7 +4,6 @@ import os
 import config
 import threading
 
-from configs.derived_vars import is_development
 from ..internals.utils import thread_master
 from ..internals.utils.flask_thread import FlaskThread
 from ..internals.utils.utils import get_import_id
@@ -105,10 +104,6 @@ def import_api():
     elif service == 'discord':
         target = discord.import_posts
         args = (key, channel_ids.strip().replace(" ", ""), contributor_id, allowed_to_auto_import, None)
-    elif is_development and service == 'kemono-dev':
-        from development import kemono_dev
-        target = kemono_dev.import_posts
-        args = (key,)
 
     if target is not None and args is not None:
         logger.log(import_id, f'Starting import. Your import id is {import_id}.')

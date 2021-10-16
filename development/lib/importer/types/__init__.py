@@ -3,5 +3,5 @@ from .comment import Comment
 from .dm import DM
 from .embed import Embed
 from .file import File
-from .post import Post
+from .post import Post, Post_Model
 from .user import User
