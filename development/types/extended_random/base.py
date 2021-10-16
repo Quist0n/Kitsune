@@ -13,7 +13,7 @@ class Extended_Random(Random):
     text_vocab = string.printable
     sentence_list = lorem_sentences
     #Unix epoch time limits
-    unix_max_date = datetime.now().timestamp()
+    unix_max_date = datetime(2021, 10, 5, 0, 0, 0).timestamp()
     unix_min_date = datetime.fromtimestamp(0)
 
     def string(self, min_length: int, max_length: int, vocabulary: str = varchar_vocab):
