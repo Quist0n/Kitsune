@@ -1,9 +1,9 @@
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import Random
 from .lorem import lorem_sentences
 
-from typing import List
+from typing import Any, List
 
 class Extended_Random(Random):
     """
@@ -12,9 +12,13 @@ class Extended_Random(Random):
     varchar_vocab = string.ascii_letters + string.digits
     text_vocab = string.printable
     sentence_list = lorem_sentences
-    #Unix epoch time limits
-    unix_max_date = datetime(2021, 10, 5, 0, 0, 0).timestamp()
-    unix_min_date = datetime.fromtimestamp(0)
+    unix_epoch_start = datetime.fromtimestamp(30256871)
+    max_date = None
+
+    def __init__(self, x: Any = ..., max_date: datetime = None) -> None:
+        super().__init__(x=x)
+        if max_date:
+            self.max_date = max_date
 
     def string(self, min_length: int, max_length: int, vocabulary: str = varchar_vocab):
         "Creates a continious string with random letters."
@@ -60,6 +64,9 @@ class Extended_Random(Random):
 
         return result
 
-    def date(min_timestamp = int(unix_min_date), max_timestamp = int(unix_max_date)) -> datetime:
-        random_timestamp = randint(unix_min_date, unix_max_date)
-        return datetime.fromtimestamp(random_timestamp)
+    def date(self, min_date = unix_epoch_start) -> datetime:
+        max_date = self.max_date if self.max_date else datetime.now()
+        int_delta = int((max_date - min_date).total_seconds())
+        random_second = self.randint(0, int_delta)
+        random_date = min_date + timedelta(seconds=random_second)
+        return random_date
