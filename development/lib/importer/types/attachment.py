@@ -2,4 +2,6 @@ from typing import TypedDict
 
 
 class Attachment(TypedDict):
-    pass
+    name: str
+    path: str
+
