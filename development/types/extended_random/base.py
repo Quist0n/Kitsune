@@ -64,7 +64,8 @@ class Extended_Random(Random):
 
         return result
 
-    def date(self, min_date = unix_epoch_start) -> datetime:
+    def date(self, min_date: datetime = unix_epoch_start) -> datetime:
+        """Returns random date."""
         max_date = self.max_date if self.max_date else datetime.now()
         int_delta = int((max_date - min_date).total_seconds())
         random_second = self.randint(0, int_delta)
