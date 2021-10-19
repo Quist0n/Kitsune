@@ -3,7 +3,8 @@ sys.setrecursionlimit(100000)
 import json
 
 from development.internals import dev_random
-from src.internals.database.database import get_raw_conn, return_conn from src.internals.utils.logger import log
+from src.internals.database.database import get_raw_conn, return_conn
+from src.internals.utils.logger import log
 from src.lib.post import post_exists, post_flagged
 from src.importers.patreon import get_current_user_id
 from .randoms import random_post
