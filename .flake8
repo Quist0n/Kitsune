@@ -2,6 +2,8 @@
 ignore =
     # Some template strings can easily go over the limit
     E501
+    # Doesn't work well with __init__.py files
+    F401
 exclude =
     .git,
     __pycache__,
