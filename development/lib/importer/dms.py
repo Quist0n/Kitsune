@@ -48,8 +48,6 @@ def save_dm_to_db(dm: DM):
         file = json.dumps(dm['file']),
     )
 
-    print("Query params:\n", query_params)
-    print("dm info:\n", dm)
     query = """
     INSERT INTO dms (id, \"user\", service, file)
     VALUES (%(id)s, %(user)s, %(service)s, %(file)s)
