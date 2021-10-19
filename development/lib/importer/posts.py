@@ -46,13 +46,12 @@ def save_post_to_db(post: Post):
         user = post['user'],
         service = post['service'],
         file = json.dumps(post['file']),
-        #TODO: Get parsing of attachements for query right
-        attachments = json.dumps({}),
+        attachments = [json.dumps(post['attachments'])],
     )
 
     query = """
     INSERT INTO posts (id, \"user\", service, file, attachments)
-    VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s)
+    VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[])
     ON CONFLICT (id, service) DO NOTHING
     """
 
