@@ -1,16 +1,13 @@
 import sys
-sys.setrecursionlimit(100000)
 import json
-
 from development.internals import dev_random
 from src.internals.database.database import get_raw_conn, return_conn
 from src.internals.utils.logger import log
-
 from .randoms import random_dm
 from development.types import Extended_Random
-
 from typing import List
 from .types import DM
+sys.setrecursionlimit(100000)
 
 
 def import_dms(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random):
@@ -25,9 +22,8 @@ def import_dms(import_id: str, key: str, contributor_id: str, random: Extended_R
     log(import_id, f'{len(dms)} DMs are going to be \"imported\"')
 
     for dm in dms:
-            log(import_id, f"Importing dm {dm['id']}")
-            import_dm(import_id, key, contributor_id, dm)
-
+        log(import_id, f"Importing dm {dm['id']}")
+        import_dm(import_id, key, contributor_id, dm)
 
 
 def import_dm(import_id: str, key: str, contributor_id: str, dm: DM):
