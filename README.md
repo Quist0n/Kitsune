@@ -28,4 +28,13 @@ Assuming you are in the `archiver` folder:
     pip install --requirement requirements.txt
     ```
 
+5. Install `pre-commit` hooks:
+    ```sh
+    pre-commit install
+    ````
+6. Optionally check the files:
+    ```sh
+    pre-commit run --all-files
+    ```
+
 This way you'll have all IDE juice while working on it as a submodule.
