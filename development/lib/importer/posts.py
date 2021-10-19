@@ -17,11 +17,14 @@ def import_posts(import_id: str, key: str, random: Extended_Random = dev_random)
 
     post_amount = range(random.randint(23, 117))
     posts: List[Post] = [random_post(random) for post in post_amount]
-    log(import_id, f'{len(posts)} posts are going to be \"imported\"')
+    log(import_id, f'{len(posts)} posts are going to be \"imported\".')
 
     for post in posts:
-        log(import_id, f"Importing post {post['id']}")
+        print(f"Post: {json.dumps(post)}")
+        log(import_id, f"Importing post \"{post['id']}\" from artist \"{post['user']}\".")
         import_post(import_id, key, post)
+
+    log(import_id, f"Finished scanning for posts")
 
 def import_post(import_id:str, key: str, post: Post):
     """Imports a test post."""
@@ -30,11 +33,14 @@ def import_post(import_id:str, key: str, post: Post):
     #     log(import_id, f"Skipping post \"{post['id']}\" from user because already exists.")
     #     return
 
-    log(import_id, f"Starting import: {post['id']} from user")
+    log(import_id, f"Starting import: \"{post['id']}\" from user \"{post['user']}\"")
     save_post_to_db(post)
 
 def save_post_to_db(post: Post):
-    """Save test posts to DB"""
+    """
+    Saves test posts to DB.
+    TODO: rewrite into more generic way.
+    """
     query_params = dict(
         id = post['id'],
         user = post['user'],
@@ -44,8 +50,6 @@ def save_post_to_db(post: Post):
         attachments = json.dumps({}),
     )
 
-    print("Query params:\n", query_params)
-    print("Post info:\n", post)
     query = """
     INSERT INTO posts (id, \"user\", service, file, attachments)
     VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s)

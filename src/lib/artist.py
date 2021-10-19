@@ -4,6 +4,7 @@ import requests
 import logging
 import config
 
+from configs.derived_vars import is_development
 from ..internals.utils.proxy import get_proxy
 from ..internals.cache.redis import delete_keys, delete_keys_pattern
 from ..internals.database.database import get_raw_conn, return_conn, get_cursor
@@ -38,7 +39,7 @@ def delete_all_artist_keys():
         'non_discord_artist_keys',
         'non_discord_artists'
     ]
-    
+
     delete_keys(keys)
 
 def dm_exists(service, artist_id, dm_id, content):
@@ -71,12 +72,25 @@ def is_artist_dnp(service, artist_id):
 def index_artists():
     conn = get_raw_conn()
     cursor = conn.cursor()
-
-    cursor.execute('select "user", "service" from "posts" as "post" where not exists (select * from "lookup" where id = post."user" and service = post.service) group by "user", "service"')
+    query = """
+        SELECT "user", "service"
+        FROM "posts" AS "post"
+        WHERE
+            NOT EXISTS (
+                SELECT *
+                FROM "lookup"
+                WHERE
+                    id = post."user"
+                    AND service = post.service
+            )
+        GROUP BY "user", "service"
+    """
+    cursor.execute(query)
     results = cursor.fetchall()
 
     for post in results:
         try:
+            model = None
             if post["service"] == 'patreon':
                 scraper = cloudscraper.create_scraper()
                 user = scraper.get('https://api.patreon.com/user/' + post["user"], proxies=get_proxy()).json()
@@ -125,8 +139,18 @@ def index_artists():
                     "name": soup.find('strong', class_='prof_maker_name').string,
                     "service": "dlsite"
                 }
+            # elif is_development:
+            #     from development import service_name
 
-            write_model_to_db(conn, cursor, model)
+            #     if post["service"] == service_name:
+            #         model = dict(
+            #             id= "",
+            #             name= "",
+            #             service= ""
+            #         )
+
+            if model:
+                write_model_to_db(conn, cursor, model)
 
             if (config.ban_url):
                 requests.request('BAN', f"{config.ban_url}/{post['service']}/user/" + post['user'])
@@ -170,7 +194,7 @@ def index_discord_channel_server(channel_data, server_data):
             "name": channel_data['name'],
             "service": "discord-channel"
         }
-        write_model_to_db(conn, cursor, model)       
+        write_model_to_db(conn, cursor, model)
 
     cursor.close()
     return_conn(conn)
