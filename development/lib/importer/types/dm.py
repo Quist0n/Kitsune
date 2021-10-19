@@ -8,12 +8,12 @@ class Optional(TypedDict, total= False):
     added: datetime
     import_id: str
     contributor_id: str
-
-class DM(Optional):
-    id: str
-    user_id:str
-    service: str
     content: str
     embed: Embed
     published: datetime
+
+class DM(Optional):
+    id: str
+    user: str
+    service: str
     file: File

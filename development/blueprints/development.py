@@ -26,7 +26,8 @@ def generate_test_entries():
     import_id = get_import_id(key)
     service = service_name
     target = importer.import_posts
-    args = (key, test_random)
+    contributor_id : str = request.form.get("account_id")
+    args = (key, contributor_id, test_random)
 
     if target and args:
         logger.log(import_id, f'Starting import. Your import id is {import_id}.')

@@ -1,19 +1,24 @@
 import sys
-import json
 sys.setrecursionlimit(100000)
+import json
 
 from development.internals import dev_random
-from src.internals.database.database import get_raw_conn, return_conn
-from src.internals.utils.logger import log
+from src.internals.database.database import get_raw_conn, return_conn from src.internals.utils.logger import log
 from src.lib.post import post_exists, post_flagged
+from src.importers.patreon import get_current_user_id
 from .randoms import random_post
+from .dms import import_dms
+from development.types import Extended_Random
 
 from typing import List
-from development.types import Extended_Random
 from .types import Post
 
-def import_posts(import_id: str, key: str, random: Extended_Random = dev_random):
-    """Imports test posts."""
+def import_posts(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random):
+    """Imports test posts with dms."""
+
+    log(import_id, f"Importing DMs...")
+    import_dms(import_id, key, contributor_id)
+    log(import_id, f"Done importing DMs.")
 
     post_amount = range(random.randint(23, 117))
     posts: List[Post] = [random_post(random) for post in post_amount]
@@ -26,7 +31,7 @@ def import_posts(import_id: str, key: str, random: Extended_Random = dev_random)
     log(import_id, f"Finished scanning for posts")
 
 def import_post(import_id:str, key: str, post: Post):
-    """Imports a test post."""
+    """Imports a single test post."""
 
     # if post_exists('kemono-dev', post['user'], post['id']) and not post_flagged('kemono-dev', post['user'], post['id']):
     #     log(import_id, f"Skipping post \"{post['id']}\" from user because already exists.")
