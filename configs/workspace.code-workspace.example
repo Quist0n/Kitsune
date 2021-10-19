@@ -8,7 +8,20 @@
 		"editor.tabSize": 4,
 		"python.linting.enabled": true,
 		"python.linting.flake8Enabled": true,
-		"python.linting.flake8Args": ["--verbose"]
+		"python.linting.flake8Args": [
+			"--verbose"
+		],
+		"python.formatting.autopep8Args": [],
+		"editor.rulers": [
+			{
+				"column": 65,
+				"color": "orange"
+			},
+			{
+				"column": 120,
+				"color": "red"
+			},
+		]
 	},
 	"extensions": {
 		"recommendations": [
