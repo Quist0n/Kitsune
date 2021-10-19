@@ -20,7 +20,6 @@ def import_posts(import_id: str, key: str, random: Extended_Random = dev_random)
     log(import_id, f'{len(posts)} posts are going to be \"imported\".')
 
     for post in posts:
-        print(f"Post: {json.dumps(post)}")
         log(import_id, f"Importing post \"{post['id']}\" from artist \"{post['user']}\".")
         import_post(import_id, key, post)
 
