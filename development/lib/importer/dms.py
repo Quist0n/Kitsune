@@ -10,38 +10,37 @@ from .types import DM
 sys.setrecursionlimit(100000)
 
 
-def import_dms(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random):
+def import_dms(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random, user_id: str = None):
     """Imports test DMs."""
 
-    try:
-        dm_amount = range(random.randint(2, 90))
-        dms: List[DM] = [random_dm(random) for i in dm_amount]
-    except Exception as e:
-        log(import_id, f"Error:{e}")
+    log(import_id, "Importing DMs...")
+    dm_amount = range(random.randint(2, 90))
+    dms: List[DM] = [random_dm(random, user_id) for i in dm_amount]
 
     log(import_id, f'{len(dms)} DMs are going to be \"imported\"')
 
     for dm in dms:
-        log(import_id, f"Importing dm {dm['id']}")
+        log(import_id, f"Importing dm \"{dm['id']}\" from user \"{dm['user']}\"")
         import_dm(import_id, key, contributor_id, dm)
+
+    log(import_id, "Done importing DMs.")
 
 
 def import_dm(import_id: str, key: str, contributor_id: str, dm: DM):
     """Imports a single test DM"""
-    log(import_id, f"Starting import: {dm['id']} from user")
     try:
         save_dm_to_db(dm)
     except Exception as e:
-        log(import_id, f"Error:{e} with dm: {dm}")
+        log(import_id, f"ERROR {e}: FAILED TO IMPORT {dm}")
 
 
 def save_dm_to_db(dm: DM):
     """Save test dm to DB"""
     query_params = dict(
-        id = dm['id'],
-        user = dm['user'],
-        service = dm['service'],
-        file = json.dumps(dm['file']),
+        id=dm['id'],
+        user=dm['user'],
+        service=dm['service'],
+        file=json.dumps(dm['file']),
     )
 
     query = """

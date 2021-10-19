@@ -27,7 +27,7 @@ def generate_test_entries():
     key = dev_random.string(127, 255)
     import_id = get_import_id(key)
     # service = service_name
-    target = importer.import_posts
+    target = importer.import_users
     contributor_id: str = request.form.get("account_id")
     args = (key, contributor_id, test_random)
 

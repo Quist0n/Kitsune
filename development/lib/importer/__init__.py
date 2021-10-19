@@ -2,4 +2,4 @@
 Test importer.
 """
 
-from .posts import import_posts
+from .users import import_users
