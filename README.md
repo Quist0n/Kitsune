@@ -30,11 +30,19 @@ Assuming you are in the `archiver` folder:
 
 5. Install `pre-commit` hooks:
     ```sh
-    pre-commit install
+    pre-commit install --install-hooks
     ````
+
 6. Optionally check the files:
     ```sh
     pre-commit run --all-files
     ```
+
+### VSCode
+Copy `.code-workspace` file:
+```sh
+cd configs/workspace.code-workspace.example kitsune.code-workspace
+```
+And install recommended extensions.
 
 This way you'll have all IDE juice while working on it as a submodule.

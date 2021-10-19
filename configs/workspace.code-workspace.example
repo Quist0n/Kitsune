@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.tabSize": 4,
+		"python.linting.enabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Args": ["--verbose"]
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-azuretools.vscode-docker",
+			"ms-python.vscode-pylance",
+			"ms-toolsai.jupyter"
+		],
+	}
+}

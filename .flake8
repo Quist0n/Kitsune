@@ -1,0 +1,9 @@
+[flake8]
+ignore =
+    # Some template strings can easily go over the limit
+    E501
+exclude =
+    .git,
+    __pycache__,
+    venv
+max-complexity = 10
