@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from datetime import datetime
 
-from development.internals import dev_random
+from development.internals import dev_random, dev_seed, dev_max_date
 from development.lib import importer, randoms
 from development.lib.service_key import get_service_keys, kill_service_keys
 from development.types import Extended_Random
@@ -19,29 +19,48 @@ def health_check():
     return '', 200
 
 
-@development.route('/development/test-entries', methods=['POST'])
-def generate_test_entries():
-    seed = 'Kitsune_Sneedy_Seed'
-    max_date = datetime(2021, 10, 5, 0, 0, 0)
-    test_random = Extended_Random(seed, max_date)
+@development.route('/development/test-entries/seeded', methods=['POST'])
+def generate_seeded_entries():
+    test_random = Extended_Random(dev_seed, dev_max_date)
     key = dev_random.string(127, 255)
     import_id = get_import_id(key)
     # service = service_name
-    target = importer.import_users
+    target = importer.import_posts
     contributor_id: str = request.form.get("account_id")
     args = (key, contributor_id, test_random)
 
     if target and args:
         logger.log(
-            import_id, f'Starting import. Your import id is {import_id}.')
+            import_id, f'Starting import. Your import id is \"{import_id}\".')
         FlaskThread(
             target=import_manager.import_posts,
             args=(import_id, target, args)
         ).start()
     else:
         logger.log(
-            import_id, f'Error starting import. Your import id is {import_id}.'
+            import_id, f'Error starting import. Your import id is \"{import_id}\".'
         )
+
+    return import_id, 200
+
+
+@development.route('/development/test-entries/random', methods=['POST'])
+def generate_random_entries():
+    key = dev_random.string(127, 255)
+    import_id = get_import_id(key)
+    # service = service_name
+    target = importer.import_posts
+    contributor_id: str = request.form.get("account_id")
+    args = (key, contributor_id)
+
+    if target and args:
+        logger.log(import_id, f'Starting import. Your import id is \"{import_id}\".')
+        FlaskThread(
+            target=import_manager.import_posts,
+            args=(import_id, target, args)
+        ).start()
+    else:
+        logger.log(import_id, f'Error starting import. Your import id is \"{import_id}\".')
 
     return import_id, 200
 

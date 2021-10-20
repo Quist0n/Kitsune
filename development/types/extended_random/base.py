@@ -5,6 +5,7 @@ from .lorem import lorem_sentences
 
 from typing import Any, List
 
+
 class Extended_Random(Random):
     """
     `Random` with additional helper methods.
@@ -29,13 +30,13 @@ class Extended_Random(Random):
 
     def varchar(self, min_length: int = 5, max_length: int = 20):
         """Generates `varchar` type of string."""
-        result_string = self.string(min_length, max_length, vocabulary= self.varchar_vocab)
+        result_string = self.string(min_length, max_length, vocabulary=self.varchar_vocab)
 
         return result_string
 
     def text(self, min_length: int = 20, max_length: int = 256):
         """Generates `text` type of string."""
-        result_string = self.string(min_length, max_length, vocabulary= self.text_vocab)
+        result_string = self.string(min_length, max_length, vocabulary=self.text_vocab)
 
         return result_string
 
@@ -43,8 +44,10 @@ class Extended_Random(Random):
         result = bool(self.randint(0, 1))
         return result
 
-    def lorem_ipsum(self, min_paragraphs: int = 1,
-    max_paragraphs: int = 5, max_sentences: int = 7, sentence_list: List[str] = sentence_list):
+    def lorem_ipsum(self,
+                    min_paragraphs: int = 1,
+                    max_paragraphs: int = 5, max_sentences: int = 7, sentence_list: List[str] = sentence_list
+                    ):
         """Creates a semi-readable string."""
         paragraphs_amount = self.randint(min_paragraphs, max_paragraphs)
 

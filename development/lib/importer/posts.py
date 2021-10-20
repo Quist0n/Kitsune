@@ -1,30 +1,45 @@
-import sys
-import json
-from typing import List
 from .types import Post
-from development.internals import dev_random
-from src.internals.database.database import get_raw_conn, return_conn
-from src.internals.utils.logger import log
-from .randoms import random_post
 from development.types import Extended_Random
+from .randoms import random_post, random_user, random_dm
+from .users import import_users
+from .dms import import_dms
+from src.internals.utils.logger import log
+from src.internals.database.database import get_raw_conn, return_conn
+from development.internals import dev_random
+import json
+import sys
 sys.setrecursionlimit(100000)
 
 
-def import_posts(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random, user_id: str = None):
+def import_posts(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random):
     """Imports test posts with dms."""
+    user_amount = range(random.randint(3, 15))
+    users = [random_user() for user in user_amount]
+    log(import_id, f"{len(users)} creators are going to be \"imported\"")
+    post_users = random.sample(users, random.randint(1, len(users)))
+    dm_users = random.sample(users, random.randint(1, len(users)))
 
     post_amount = range(random.randint(23, 117))
-    posts: List[Post] = [random_post(random, user_id) for post in post_amount]
+    posts = [random_post(random=random) for index in post_amount]
+    posts.extend([random_post(user['id'], random) for user in post_users])
     log(import_id, f'{len(posts)} posts are going to be \"imported\".')
+
+    dm_amount = range(random.randint(7, 13))
+    dms = [random_dm(import_id, contributor_id, random=random) for index in dm_amount]
+    dms.extend([random_dm(import_id, contributor_id, user['id'], random) for user in dm_users])
+    log(import_id, f'{len(dms)} DMs are going to be \"imported\"')
+
+    import_dms(import_id, dms)
+    import_users(import_id, users)
 
     for post in posts:
         log(import_id, f"Importing post \"{post['id']}\" from user \"{post['user']}\".")
-        import_post(import_id, key, post)
+        import_post(import_id, post)
 
     log(import_id, "Done importing posts.")
 
 
-def import_post(import_id: str, key: str, post: Post):
+def import_post(import_id: str, post: Post):
     """Imports a single test post."""
 
     # if post_exists('kemono-dev', post['user'], post['id']) and not post_flagged('kemono-dev', post['user'], post['id']):

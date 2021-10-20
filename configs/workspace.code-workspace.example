@@ -6,6 +6,8 @@
 	],
 	"settings": {
 		"editor.tabSize": 4,
+		"editor.wordWrap": "bounded",
+		"editor.wordWrapColumn": 120,
 		"python.linting.enabled": true,
 		"python.linting.flake8Enabled": true,
 		"python.linting.flake8Args": [
