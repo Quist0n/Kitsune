@@ -10,7 +10,7 @@ from ..internals.utils.utils import get_import_id
 from ..internals.utils.encryption import encrypt_and_log_session
 from ..internals.utils import logger
 from ..lib.import_manager import import_posts
-from ..lib.autoimport import decrypt_all_good_keys, log_import_id
+from ..lib.autoimport import decrypt_all_good_keys, log_import_id, revoke_v1_key, encrypt_and_save_session_for_auto_import
 from ..internals.utils.download import uniquify
 from werkzeug.utils import secure_filename
 
@@ -23,12 +23,25 @@ from ..importers import fantia
 
 api = Blueprint('api', __name__)
 
+
 @api.route('/api/autoimport', methods=['POST'])
 def autoimport_api():
     prv_key = request.form.get('private_key')
 
     if not prv_key:
         return "No private key provided.", 401
+
+    # migrate v1 (no hash) keys
+    keys_to_migrate = None
+    try:
+        keys_to_migrate = decrypt_all_good_keys(prv_key, v1=True)
+    except:
+        return "(v1) Error while decrypting session tokens. The private key may be incorrect.", 401
+
+    for key in keys_to_migrate:
+        encrypt_and_save_session_for_auto_import(
+            key['service'], key['decrypted_key'], contributor_id=key['contributor_id'], discord_channel_ids=key['discord_channel_ids'])
+        revoke_v1_key(key['id'])
 
     keys_to_import = None
     try:
@@ -38,27 +51,27 @@ def autoimport_api():
 
     threads = []
     for key in keys_to_import:
-        import_id = get_import_id(key['encrypted_key'])
+        import_id = get_import_id(key['decrypted_key'])
         target = None
         args = None
         if key['service'] == 'patreon':
             target = patreon.import_posts
-            args = (key['encrypted_key'], False, key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], False, key['contributor_id'], False, key['id'])
         elif key['service'] == 'fanbox':
             target = fanbox.import_posts
-            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
         elif key['service'] == 'subscribestar':
             target = subscribestar.import_posts
-            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
         elif key['service'] == 'gumroad':
             target = gumroad.import_posts
-            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
         elif key['service'] == 'fantia':
             target = fantia.import_posts
-            args = (key['encrypted_key'], key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
         elif key['service'] == 'discord':
             target = discord.import_posts
-            args = (key['encrypted_key'], key['discord_channel_ids'], key['contributor_id'], False, key['id'])
+            args = (key['decrypted_key'], key['discord_channel_ids'], key['contributor_id'], False, key['id'])
 
         log_import_id(key['id'], import_id)
         threads.append(FlaskThread(target=import_posts, args=(import_id, target, args)))
@@ -66,6 +79,7 @@ def autoimport_api():
     FlaskThread(target=thread_master.run, args=(threads,)).run()
 
     return '', 200
+
 
 @api.route('/api/import', methods=['POST'])
 def import_api():
@@ -113,10 +127,12 @@ def import_api():
 
     return import_id, 200
 
+
 @api.route('/api/logs/<import_id>', methods=['GET'])
 def get_logs(import_id):
     logs = logger.get_logs(import_id)
     return json.dumps(logs), 200
+
 
 @api.route('/api/upload/<path:path>', methods=['POST'])
 def upload_file(path):
@@ -127,6 +143,7 @@ def upload_file(path):
     filename = uniquify(os.path.join(config.download_path, path, secure_filename(uploaded_file.filename)))
     uploaded_file.save(os.path.join(config.download_path, path, filename))
     return os.path.join('/', path, filename), 200
+
 
 @api.route('/api/active_imports', methods=['GET'])
 def get_thread_count():

@@ -67,6 +67,9 @@ def generate_random_entries():
 
 @development.route('/development/service-keys', methods=['POST'])
 def generate_service_keys():
+    """
+    TODO: fix it to work with the new keys system.
+    """
     account_id: str = request.form.get('account_id')
 
     service_keys = [randoms.service_key(account_id)
