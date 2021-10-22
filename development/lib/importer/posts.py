@@ -62,8 +62,17 @@ def save_post_to_db(post: Post):
         user=post['user'],
         service=post['service'],
         file=json.dumps(post['file']),
-        attachments=[json.dumps(post['attachments'])],
+        attachments=[json.dumps(attachment) for attachment in post['attachments']],
     )
+
+    print(f"""
+        First:
+        {post['attachments']}
+        Second:
+        {query_params['attachments']}
+        Third:
+        {json.dumps(post['attachments'])}
+    """)
 
     query = """
     INSERT INTO posts (id, \"user\", service, file, attachments)
