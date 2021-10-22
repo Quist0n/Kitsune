@@ -65,15 +65,6 @@ def save_post_to_db(post: Post):
         attachments=[json.dumps(attachment) for attachment in post['attachments']],
     )
 
-    print(f"""
-        First:
-        {post['attachments']}
-        Second:
-        {query_params['attachments']}
-        Third:
-        {json.dumps(post['attachments'])}
-    """)
-
     query = """
     INSERT INTO posts (id, \"user\", service, file, attachments)
     VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[])

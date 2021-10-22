@@ -9,7 +9,7 @@ def random_post(user_id: str = None, random: Extended_Random = dev_random) -> Po
         id=random.string(5, 25),
         user=user_id if user_id else random.string(5, 25),
         service=service_name,
-        attachments=[random_attachment() for i in range(random.randint(2, 2))],
+        attachments=[random_attachment() for i in range(random.randint(0, 54))],
         file=random_file(),
     )
     return post
