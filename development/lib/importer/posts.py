@@ -63,12 +63,17 @@ def save_post_to_db(post: Post):
         service=post['service'],
         file=json.dumps(post['file']),
         attachments=[json.dumps(attachment) for attachment in post['attachments']],
+        published=post['published'],
+        edited=post['edited'],
+        title=post['title'],
+        content=post['content']
     )
 
     query = """
-    INSERT INTO posts (id, \"user\", service, file, attachments)
-    VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[])
-    ON CONFLICT (id, service) DO NOTHING
+        INSERT INTO posts
+            (id, \"user\", service, file, attachments, published, edited, title, content)
+        VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[], %(published)s, %(edited)s, %(title)s, %(content)s)
+        ON CONFLICT (id, service) DO NOTHING
     """
 
     try:

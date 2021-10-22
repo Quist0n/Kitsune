@@ -5,12 +5,21 @@ from .types import Post, User, DM, File, Attachment
 
 
 def random_post(user_id: str = None, random: Extended_Random = dev_random) -> Post:
+    published_date = random.date() if random.boolean() else None
+    edited_date = random.date(published_date) if published_date and random.boolean() else None
+    title = random.lorem_ipsum(1, 1, 1) if random.boolean() else ''
+    content = random.lorem_ipsum() if random.boolean() else ''
+
     post = Post(
         id=random.string(5, 25),
         user=user_id if user_id else random.string(5, 25),
         service=service_name,
         attachments=[random_attachment() for i in range(random.randint(0, 54))],
         file=random_file(),
+        published=published_date,
+        edited=edited_date,
+        title=title,
+        content=content
     )
     return post
 

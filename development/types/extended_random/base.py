@@ -41,6 +41,9 @@ class Extended_Random(Random):
         return result_string
 
     def boolean(self):
+        """
+        Returns random boolean value.
+        """
         result = bool(self.randint(0, 1))
         return result
 

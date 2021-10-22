@@ -5,7 +5,8 @@ from .attachment import Attachment
 from .embed import Embed
 from .file import File
 
-class Optional(TypedDict, total= False):
+
+class Optional(TypedDict, total=False):
     added: datetime
     published: datetime
     edited: datetime
@@ -13,6 +14,7 @@ class Optional(TypedDict, total= False):
     shared_file: bool
     title: str
     content: str
+
 
 class Post(Optional):
     id: str
