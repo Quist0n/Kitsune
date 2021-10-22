@@ -1,6 +1,6 @@
 import sys
 import json
-from src.internals.database.database import get_raw_conn, return_conn
+from development.internals.database import query_db
 from src.internals.utils.logger import log
 from typing import List
 from .types import DM
@@ -36,21 +36,14 @@ def save_dm_to_db(dm: DM):
         user=dm['user'],
         service=dm['service'],
         file=json.dumps(dm['file']),
-        published=dm['published']
+        published=dm['published'],
+        content=dm['content']
     )
 
     query = """
-        INSERT INTO unapproved_dms (import_id, contributor_id, id, \"user\", service, file, published)
-        VALUES (%(import_id)s, %(contributor_id)s, %(id)s, %(user)s, %(service)s, %(file)s, %(published)s)
+        INSERT INTO unapproved_dms (import_id, contributor_id, id, \"user\", service, file, published, content)
+        VALUES (%(import_id)s, %(contributor_id)s, %(id)s, %(user)s, %(service)s, %(file)s, %(published)s, %(content)s)
         ON CONFLICT (id, service)
             DO NOTHING
     """
-
-    try:
-        conn = get_raw_conn()
-        cursor = conn.cursor()
-        cursor.execute(query, query_params)
-        cursor.close()
-        conn.commit()
-    finally:
-        return_conn(conn)
+    query_db(query, query_params)

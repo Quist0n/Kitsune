@@ -27,7 +27,7 @@ def random_post(user_id: str = None, random: Extended_Random = dev_random) -> Po
 def random_user(random: Extended_Random = dev_random) -> User:
     user = User(
         id=random.string(5, 25),
-        name=random.string(5, 25),
+        name=random.text(3, 50),
         service=service_name,
     )
 
@@ -43,7 +43,8 @@ def random_dm(import_id: str, contributor_id: str, user_id: str = None, random: 
         user=user_id if user_id else random.string(5, 25),
         service=service_name,
         file=random_file(),
-        published=random.date()
+        published=random.date(),
+        content=random.lorem_ipsum()
     )
     return dm
 
@@ -61,7 +62,7 @@ def random_file(random: Extended_Random = dev_random) -> File:
 
 
 def random_attachment(random: Extended_Random = dev_random) -> Attachment:
-    file = random_file()
+    file = random_file(random)
     attachment = Attachment(
         name=file.get('name'),
         path=file.get('path'),

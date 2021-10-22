@@ -3,6 +3,7 @@ from development.types import Extended_Random
 from .randoms import random_post, random_user, random_dm
 from .users import import_users
 from .dms import import_dms
+from development.internals.database import query_db
 from src.internals.utils.logger import log
 from src.internals.database.database import get_raw_conn, return_conn
 from development.internals import dev_random
@@ -75,12 +76,4 @@ def save_post_to_db(post: Post):
         VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[], %(published)s, %(edited)s, %(title)s, %(content)s)
         ON CONFLICT (id, service) DO NOTHING
     """
-
-    try:
-        conn = get_raw_conn()
-        cursor = conn.cursor()
-        cursor.execute(query, query_params)
-        cursor.close()
-        conn.commit()
-    finally:
-        return_conn(conn)
+    query_db(query, query_params)
