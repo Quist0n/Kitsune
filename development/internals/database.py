@@ -1,7 +1,9 @@
+from psycopg2.extensions import connection
+
 from src.internals.database.database import get_raw_conn, return_conn
 
 from typing import List
-from development.types import Database_Model, Query_Args
+from development.types.models import Database_Model, Query_Args
 
 
 def save_several_models_to_db(models: List[Database_Model]):
@@ -40,3 +42,11 @@ def query_db(query: str, query_args: Query_Args):
         conn.commit()
     finally:
         return_conn(conn)
+
+
+def query_db_without_commit(conn: connection, query: str, query_args: Query_Args):
+    """
+    Performs an operation on a database without committing the result.
+    """
+    cursor = conn.cursor()
+    cursor.execute(query, query_args)
