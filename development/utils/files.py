@@ -1,13 +1,10 @@
 import os
 import tempfile
-import shutil
 from pathlib import Path
 from uuid import uuid4
-from datetime import datetime
 
-from configs.derived_vars import temp_dir_root, data_folder
+from configs.derived_vars import temp_dir_root
 from src.internals.utils.utils import get_hash_of_file
-from development.types.models import File, File_Meta
 
 from typing import List
 
@@ -40,30 +37,10 @@ def get_folder_file_paths(folder: Path, extensions: List[str] = None) -> List[Pa
     return files
 
 
-def get_file_from_path(file_path: Path):
-    """
-    Gets the file out of provided absolute path.
-    """
-    temp_path = create_temporary_directory()
-    hash_filename = generate_hashy_filename(temp_path)
-    file_name = temp_dir_root.joinpath(temp_path.name)
-    mtime = datetime.fromtimestamp(file_name.stat().st_mtime)
-    ctime = datetime.fromtimestamp(file_name.stat().st_mtime)
-    real_path = Path(data_folder, hash_filename)
-
-    if real_path.exists():
-        shutil.rmtree(temp_path.parent, ignore_errors=True)
-        return (Path(temp_path.name, hash_filename), file_path)
-
-    file = File(
-        mtime=mtime,
-        ctime=ctime
-    )
-    return file
-
-
 def create_temporary_directory() -> Path:
-    """"""
+    """
+    Creates temporary directory.
+    """
     os.makedirs(temp_dir_root, exist_ok=True)
     temp_dir = tempfile.mkdtemp(dir=temp_dir_root)
     temp_name = f'{str(uuid4())}.temp'

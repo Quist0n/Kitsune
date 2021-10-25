@@ -11,6 +11,7 @@ def import_dms(import_id: str, dms: List[DM]):
     """Imports test DMs."""
 
     log(import_id, "Importing DMs...")
+    log(import_id, f'{len(dms)} DMs are going to be \"imported\"')
 
     for dm in dms:
         log(import_id, f"Importing dm \"{dm['id']}\" from user \"{dm['user']}\"")

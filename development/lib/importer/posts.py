@@ -1,37 +1,18 @@
-from .types import Post
-from development.types import Extended_Random
-from .randoms import random_post, random_user, random_dm
-from .users import import_users
-from .dms import import_dms
-from development.internals.database import query_db
-from src.internals.utils.logger import log
-from src.internals.database.database import get_raw_conn, return_conn
-from development.internals import dev_random
-import json
 import sys
+import json
+
+from src.internals.utils.logger import log
+from development.internals.database import query_db
+
+from typing import List
+from .types import Post, File
 sys.setrecursionlimit(100000)
 
 
-def import_posts(import_id: str, key: str, contributor_id: str, random: Extended_Random = dev_random):
-    """Imports test posts with dms."""
-    user_amount = range(random.randint(3, 15))
-    users = [random_user() for user in user_amount]
-    log(import_id, f"{len(users)} creators are going to be \"imported\"")
-    post_users = random.sample(users, random.randint(1, len(users)))
-    dm_users = random.sample(users, random.randint(1, len(users)))
+def import_posts(import_id: str, posts: List[Post]):
+    """Imports test posts."""
 
-    post_amount = range(random.randint(23, 117))
-    posts = [random_post(random=random) for index in post_amount]
-    posts.extend([random_post(user['id'], random) for user in post_users])
     log(import_id, f'{len(posts)} posts are going to be \"imported\".')
-
-    dm_amount = range(random.randint(7, 13))
-    dms = [random_dm(import_id, contributor_id, random=random) for index in dm_amount]
-    dms.extend([random_dm(import_id, contributor_id, user['id'], random) for user in dm_users])
-    log(import_id, f'{len(dms)} DMs are going to be \"imported\"')
-
-    import_dms(import_id, dms)
-    import_users(import_id, users)
 
     for post in posts:
         log(import_id, f"Importing post \"{post['id']}\" from user \"{post['user']}\".")
@@ -74,6 +55,30 @@ def save_post_to_db(post: Post):
         INSERT INTO posts
             (id, \"user\", service, file, attachments, published, edited, title, content)
         VALUES (%(id)s, %(user)s, %(service)s, %(file)s, %(attachments)s::jsonb[], %(published)s, %(edited)s, %(title)s, %(content)s)
-        ON CONFLICT (id, service) DO NOTHING
+        ON CONFLICT (id, service)
+            DO NOTHING
     """
     query_db(query, query_params)
+
+
+def get_files_from_posts(posts: List[Post]) -> List[File]:
+    """
+    A helper function to create a single collection out of all files from posts.
+    """
+    files = []
+
+    for post in posts:
+        file = post['file'] if post['file'].get('name') else None
+        attachments = post['attachments'] if post.get('attachments') else None
+        inner_files = []
+
+        if file:
+            inner_files.append(file)
+
+        if attachments:
+            inner_files.extend(attachments)
+
+        if inner_files:
+            files.extend(inner_files)
+
+    return files

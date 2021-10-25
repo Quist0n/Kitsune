@@ -1,4 +1,4 @@
 from .random import dev_random, dev_seed, dev_max_date
-from .paths import assets_folder
+from .assets import assets_folder, file_extensions, asset_files
+
 service_name = 'kemono-dev'
-file_extensions = ['gif', 'jpeg', 'jpe', 'png', 'webp']

@@ -7,6 +7,7 @@ from src.internals.utils.logger import log
 
 def import_users(import_id: str, users: List[User]):
     """Imports test users."""
+    log(import_id, f"{len(users)} creators are going to be \"imported\"")
 
     if users:
         for user in users:

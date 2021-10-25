@@ -1,6 +1,4 @@
 """
 Test importer.
 """
-
-from .users import import_users
-from .posts import import_posts
+from .importer import run_paysite_import as import_posts
