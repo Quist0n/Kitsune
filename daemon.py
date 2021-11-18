@@ -27,4 +27,4 @@ with backend.lock():
 Thread(target=indexer.run).start()
 if (config.pubsub):
     Thread(target=key_watcher.watch).start()
-Thread(target=server.run()).start()
+Thread(target=server.run).start()
