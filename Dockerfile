@@ -18,13 +18,4 @@ COPY . /app
 
 ENV LANG=C.UTF-8
 
-CMD uwsgi --http=0.0.0.0:80 \
-    --manage-script-name \
-    --mount /=server:app \
-    --processes %k \
-    --threads 1 \
-    --master \
-    --listen 40000 \
-    --disable-logging \
-    --log-5xx \
-    --enable-threads
+CMD python3 daemon.py
