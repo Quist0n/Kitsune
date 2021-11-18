@@ -23,7 +23,7 @@ if is_development:
 
 def run():
     print('Webserver is starting!')
-    bjoern.run(app, '127.0.0.1', int(webserver_port))
+    bjoern.run(app, '0.0.0.0', int(webserver_port))
 
 
 @app.teardown_appcontext
