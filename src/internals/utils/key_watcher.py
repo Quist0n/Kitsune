@@ -4,7 +4,7 @@ import random
 import string
 import time
 import json
-from .flask_thread import FlaskThread
+from threading import Thread
 from src.internals.utils import logger
 from src.internals.utils.encryption import encrypt_and_log_session
 from src.lib.import_manager import import_posts
@@ -99,7 +99,7 @@ def watch(queue_limit=2000):
 
                         if target is not None and args is not None:
                             logger.log(import_id, f'Starting import. Your import id is {import_id}.')
-                            thread = FlaskThread(target=import_posts, args=(import_id, target, args))
+                            thread = Thread(target=import_posts, args=(import_id, target, args))
                             thread.start()
                             threads_to_run.append(thread)
                             redis.set(f"running_imports:{archiver_id}:{import_id}", '1')
