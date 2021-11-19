@@ -92,6 +92,8 @@ def watch(queue_limit=2000):
                             args = (service_key, contributor_id, allowed_to_auto_import, None)
                         elif service == 'discord':
                             target = discord.import_posts
+                            if channel_ids is None:
+                                channel_ids = ''
                             args = (service_key, channel_ids.strip().replace(" ", ""), contributor_id, allowed_to_auto_import, None)
                         else:
                             logger.log(import_id, f'Service "{service}" unsupported.')
