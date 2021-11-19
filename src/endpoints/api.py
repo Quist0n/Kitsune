@@ -49,12 +49,12 @@ def autoimport_api():
     except:
         return "Error while decrypting session tokens. The private key may be incorrect.", 401
 
-    threads = []
     for key in keys_to_import:
         redis = get_redis()
         import_id = get_import_id(key['decrypted_key'])
         data = {
             'key': key['decrypted_key'],
+            'key_id': key['id'],
             'service': key['service'],
             'channel_ids': request.form.get("discord_channel_ids"),
             'auto_import': None,

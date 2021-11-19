@@ -51,8 +51,8 @@ def watch(queue_limit=2000):
                         target = None
                         args = None
                         # data = {
-                        #     'import_id': import_id,
                         #     'key': key,
+                        #     'key_id': key_id,
                         #     'service': service,
                         #     'allowed_to_auto_import': allowed_to_auto_import,
                         #     'allowed_to_save_session': allowed_to_save_session,
@@ -61,6 +61,7 @@ def watch(queue_limit=2000):
                         #     'contributor_id': contributor_id
                         # }
                         service_key = key_data['key']
+                        key_id = key_data['key_id']
                         service = key_data['service']
                         allowed_to_auto_import = key_data.get('auto_import', False)
                         allowed_to_save_session = key_data.get('save_session_key', False)
