@@ -52,6 +52,7 @@ def autoimport_api():
     for key in keys_to_import:
         redis = get_redis()
         import_id = get_import_id(key['decrypted_key'])
+        log_import_id(key['id'], import_id)
         data = {
             'key': key['decrypted_key'],
             'key_id': key['id'],
