@@ -4,6 +4,7 @@ import os
 import config
 import threading
 
+from ..internals.cache.redis import get_redis
 from ..internals.utils import thread_master
 from ..internals.utils.flask_thread import FlaskThread
 from ..internals.utils.utils import get_import_id
@@ -20,7 +21,7 @@ from ..importers import subscribestar
 from ..importers import gumroad
 from ..importers import discord
 from ..importers import fantia
-
+from ..importers import onlyfans
 api = Blueprint('api', __name__)
 
 
@@ -51,32 +52,18 @@ def autoimport_api():
 
     threads = []
     for key in keys_to_import:
+        redis = get_redis()
         import_id = get_import_id(key['decrypted_key'])
-        target = None
-        args = None
-        if key['service'] == 'patreon':
-            target = patreon.import_posts
-            args = (key['decrypted_key'], False, key['contributor_id'], False, key['id'])
-        elif key['service'] == 'fanbox':
-            target = fanbox.import_posts
-            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
-        elif key['service'] == 'subscribestar':
-            target = subscribestar.import_posts
-            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
-        elif key['service'] == 'gumroad':
-            target = gumroad.import_posts
-            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
-        elif key['service'] == 'fantia':
-            target = fantia.import_posts
-            args = (key['decrypted_key'], key['contributor_id'], False, key['id'])
-        elif key['service'] == 'discord':
-            target = discord.import_posts
-            args = (key['decrypted_key'], key['discord_channel_ids'], key['contributor_id'], False, key['id'])
-
-        log_import_id(key['id'], import_id)
-        threads.append(FlaskThread(target=import_posts, args=(import_id, target, args)))
-
-    FlaskThread(target=thread_master.run, args=(threads,)).start()
+        data = {
+            'key': key['decrypted_key'],
+            'service': key['service'],
+            'channel_ids': request.form.get("discord_channel_ids"),
+            'auto_import': None,
+            'save_session_key': None,
+            'save_dms': None,
+            'contributor_id': key['contributor_id']
+        }
+        redis.set('imports:' + import_id, json.dumps(data))
 
     return '', 200
 
