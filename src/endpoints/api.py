@@ -21,7 +21,6 @@ from ..importers import subscribestar
 from ..importers import gumroad
 from ..importers import discord
 from ..importers import fantia
-from ..importers import onlyfans
 api = Blueprint('api', __name__)
 
 
