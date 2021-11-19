@@ -61,7 +61,7 @@ def watch(queue_limit=2000):
                         #     'contributor_id': contributor_id
                         # }
                         service_key = key_data['key']
-                        key_id = key_data['key_id']
+                        key_id = key_data.get('key_id', None)
                         service = key_data['service']
                         allowed_to_auto_import = key_data.get('auto_import', False)
                         allowed_to_save_session = key_data.get('save_session_key', False)
