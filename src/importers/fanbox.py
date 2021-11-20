@@ -6,6 +6,7 @@ from os import makedirs
 from os.path import join
 import requests
 import datetime
+import dateutil
 import config
 import json
 from setproctitle import setthreadtitle
@@ -24,7 +25,7 @@ from ..internals.utils.download import download_file, DownloaderException
 from ..internals.utils.utils import get_import_id
 from ..internals.utils.logger import log
 from ..internals.utils.scrapper import create_scrapper_session
-
+#csvsdv
 def import_comment(comment, user_id, post_id, import_id):
     commenter_id = comment['user']['userId']
     comment_id = comment['id']
@@ -113,7 +114,8 @@ def import_comments(key, post_id, user_id, import_id, existing_comment_ids):
             else:
                 return
 
-def import_posts(import_id, key, contributor_id = None, allowed_to_auto_import = None, key_id = None, url = 'https://api.fanbox.cc/post.listSupporting?limit=50'):
+# gets the campaign ids for the creators currently supported
+def get_subscribed_ids(import_id, key, contributor_id = None, allowed_to_auto_import = None, key_id = None, url = 'https://api.fanbox.cc/post.listSupporting?limit=50'):
     setthreadtitle(f'KI{import_id}')
     try:
         scraper = create_scrapper_session(useCloudscraper=False).get(
@@ -129,12 +131,99 @@ def import_posts(import_id, key, contributor_id = None, allowed_to_auto_import =
         if (e.response.status_code == 401):
             if (key_id):
                 kill_key(key_id)
-        return
+        return set()
+    except Exception:
+        log(import_id, 'Error connecting to cloudscraper. Please try again.', 'exception')
+        return set()
 
-    if (allowed_to_auto_import and url == 'https://api.fanbox.cc/post.listSupporting?limit=50'):
+    user_ids = []
+    if scraper_data.get('body'):
+        for post in scraper_data['body']['items']:
+            user_ids.append(post['user']['userId'])
+
+    campaign_ids = set()
+    if len(user_ids) > 0:
+        for id in user_ids:
+            try:
+                if not id in campaign_ids:
+                    campaign_ids.add(id)
+            except Exception as e:
+                log(import_id, f"Error while retrieving one of the campaign ids", 'exception', True)
+                continue
+    log(import_id, 'Successfully gotten subscriptions')
+    return campaign_ids
+
+
+# Retrieve ids of campaigns for which pledge has been cancelled but they've been paid for in this month.
+def get_cancelled_ids(import_id, key, url = 'https://api.fanbox.cc/payment.listPaid'):
+    today_date = datetime.datetime.today()
+    
+    try:
+        scraper = create_scrapper_session().get(
+            url,
+            cookies={ 'FANBOXSESSID': key },
+            headers={ 'origin': 'https://fanbox.cc' },
+            proxies=get_proxy()
+        )
+        scraper_data = scraper.json()
+        scraper.raise_for_status()
+
+    except requests.HTTPError as exc:
+        log(import_id, f"Status code {exc.response.status_code} when contacting Fanbox API.", 'exception')
+        return set()
+    except Exception:
+        log(import_id, 'Error connecting to cloudscraper. Please try again.', 'exception')
+        return set()
+
+    if scraper_data.get('body'):
+        bills = []
+        for bill in scraper_data['body']:
+            try:
+                pay_date = dateutil.parser.parse(bill['paymentDatetime'])
+                if pay_date.month == today_date.month :
+                    bills.append(bill)
+
+            except Exception as e:
+                log(import_id, f"Error while parsing one of the bills", 'exception', True)
+                continue
+
+    campaign_ids = set()
+    if len(bills) > 0:
+        for bill in bills:
+            try:
+                campaign_id = bill['creator']['user']['userId']
+                if not campaign_id in campaign_ids:
+                    campaign_ids.add(campaign_id)
+            except Exception as e:
+                log(import_id, f"Error while retrieving one of the cancelled campaign ids", 'exception', True)
+                continue
+
+    return campaign_ids
+
+# most of this is copied from the old import_posts. 
+# now it uses a different url specific to a single creator instead of api.fanbox.cc/post.listSupporting.
+def import_posts_via_id(import_id, key, campaign_id, contributor_id=None, allowed_to_auto_import=None, key_id=None): 
+    url = 'https://api.fanbox.cc/post.listCreator?userId={}&limit=50'.format(campaign_id)
+    try:
+        scraper = create_scrapper_session().get(
+            url,
+            cookies={ 'FANBOXSESSID': key },
+            headers={ 'origin': 'https://fanbox.cc' },
+            proxies=get_proxy()
+        )
+        scraper_data = scraper.json()
+        scraper.raise_for_status()
+    except requests.HTTPError as e:
+        log(import_id, f'HTTP error when contacting Fanbox API ({url}). Stopping import.', 'exception')
+        if (e.response.status_code == 401):
+            if (key_id):
+                kill_key(key_id)
+        return
+    
+    if (allowed_to_auto_import):
         try:
-            encrypt_and_save_session_for_auto_import('fanbox', key, contributor_id = contributor_id)
-            log(import_id, f"Your key was successfully enrolled in auto-import!", to_client = True)
+            encrypt_and_save_session_for_auto_import('fanbox', key, contributor_id=contributor_id)
+            log(import_id, f"Your key was successfully enrolled in auto-import!", to_client=True)
         except:
             log(import_id, f"An error occured while saving your key for auto-import.", 'exception')
     
@@ -302,12 +391,12 @@ def import_posts(import_id, key, contributor_id = None, allowed_to_auto_import =
                 except Exception as e:
                     log(import_id, f'Error importing post {post_id} from user {user_id}', 'exception')
                     continue
-                
-            next_url = scraper_data['body'].get('nextUrl')
-            if next_url:
+            
+            if scraper_data['data'].get('nextUrl'):
+                url = scraper_data['data'].get('nextUrl')
                 try:
-                    scraper = create_scrapper_session(useCloudscraper=False).get(
-                        next_url,
+                    scraper = create_scrapper_session().get(
+                        url,
                         cookies={ 'FANBOXSESSID': key },
                         headers={ 'origin': 'https://fanbox.cc' },
                         proxies=get_proxy()
@@ -318,7 +407,26 @@ def import_posts(import_id, key, contributor_id = None, allowed_to_auto_import =
                     log(import_id, f'HTTP error when contacting Fanbox API ({url}). Stopping import.', 'exception')
                     return
             else:
-                log(import_id, f'Finished scanning for posts')
                 return
     else:
         log(import_id, f'No posts detected.')
+
+def import_posts(import_id, key, contributor_id = None, allowed_to_auto_import = None, key_id = None):
+    # this block creates a list of campaign ids of both supported and canceled subscriptions within the month
+    subscribed_ids = get_subscribed_ids(import_id, key)
+    cancelled_ids = get_cancelled_ids(import_id, key)
+    ids = set()
+    if len(subscribed_ids) > 0:
+        ids.update(subscribed_ids)
+    if len(cancelled_ids) > 0:
+        ids.update(cancelled_ids)
+    campaign_ids = list(ids)
+
+    # this block uses the list of ids to import posts
+    if len(campaign_ids) > 0:
+        for campaign_id in campaign_ids:
+            import_posts_via_id(import_id, key, campaign_id, contributor_id=contributor_id, allowed_to_auto_import=allowed_to_auto_import, key_id=key_id)
+            log(import_id, f'Finished processing user {campaign_id}')
+        log(import_id, f'Finished scanning for posts')
+    else:
+        log(import_id, f"No active subscriptions or invalid key. No posts will be imported.", to_client = True)
