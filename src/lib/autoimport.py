@@ -41,14 +41,16 @@ def decrypt_key(key, rsa_key):
     rsa_cipher = PKCS1_OAEP.new(key_prv)
 
     try:
-        if key_to_decrypt['encrypted_key'].startswith('#'): # rsa+aes
+        if key_to_decrypt['encrypted_key'].startswith('#'):
+            # rsa+aes
             cryptstuff = key_to_decrypt['encrypted_key'].split('#')[-1]
             encrypted_aes_key, nonce, ct, tag = (b64decode(x) for x in b64decode(cryptstuff).decode('utf-8').split('|'))
             decrypted_aes_key = rsa_cipher.decrypt(encrypted_aes_key)
             cipher = AES.new(decrypted_aes_key, AES.MODE_EAX, nonce)
             key_to_decrypt['decrypted_key'] = cipher.decrypt_and_verify(ct, tag).decode('utf-8')
-        else: # rsa solo
-            key_to_decrypt['decrypted_key'] = rsa_cipher.decrypt_and_verify(b64decode(key_to_decrypt['encrypted_key'])).decode('utf-8')
+        else:
+            # rsa solo
+            key_to_decrypt['decrypted_key'] = rsa_cipher.decrypt(b64decode(key_to_decrypt['encrypted_key'])).decode('utf-8')
     except:
         return None
     return (key_to_decrypt)
