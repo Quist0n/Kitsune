@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - party
     paths-ignore:
       - '**.md'
   workflow_dispatch: []
